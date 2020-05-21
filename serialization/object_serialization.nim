@@ -112,17 +112,19 @@ macro enumAllSerializedFieldsImpl(T: type, body: untyped): untyped =
       else:
         quote do: default(`T`)[`fieldIndex`]
 
+    
     result.add quote do:
-      block:
-        `fieldNameVarTemplate`
-        template fieldCaseDiscriminator: auto {.used.} = `discriminator`
-        template fieldCaseBranches: auto {.used.} = `branches`
+      when compiles(`field`): # isnot void:
+        block:
+          `fieldNameVarTemplate`
+          template fieldCaseDiscriminator: auto {.used.} = `discriminator`
+          template fieldCaseBranches: auto {.used.} = `branches`
 
-        # type `fieldTypeVar` = `fieldType`
-        # TODO: This is a work-around for a classic Nim issue:
-        type `FieldTypeSym` {.used.} = type(`field`)
-        `body`
-
+          # type `fieldTypeVar` = `fieldType`
+          # TODO: This is a work-around for a classic Nim issue:
+          type `FieldTypeSym` {.used.} = type(`field`)
+          `body`
+    # echo result.repr
     i += 1
 
 template enumAllSerializedFields*(T: type, body): untyped =
